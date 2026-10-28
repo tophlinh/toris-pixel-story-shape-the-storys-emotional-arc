@@ -47,6 +47,7 @@ const SLIDES = [
       'AI makes it easy to generate more',
       'More docs and tooling can mean more slop',
       'Review still matters: keep what is useful',
+      'Related: <a href="https://nohello.net/en/" target="_blank" rel="noopener noreferrer">nohello.net/en</a>',
     ],
     line: "The flip side of making work faster is that we can create too much low-value documentation and tooling. Productivity also means knowing what not to keep.",
   },
