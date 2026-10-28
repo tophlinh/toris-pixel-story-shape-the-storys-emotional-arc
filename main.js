@@ -376,9 +376,14 @@ chapterNav.addEventListener('click', (event) => {
 });
 
 stage.addEventListener('click', (event) => {
-  const image = event.target.closest?.('img');
+  const target = event.target instanceof Element ? event.target : null;
+  const image = target?.closest('img');
   if (image) {
     openImageViewer(image);
+    return;
+  }
+  // Let native behavior run for links and controls inside the stage.
+  if (target?.closest('a, button, input, textarea, select, label, [role="button"]')) {
     return;
   }
   go(1);
