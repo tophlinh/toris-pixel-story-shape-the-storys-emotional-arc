@@ -1,0 +1,3 @@
+- Cozy pixel art, Stardew/Animal Crossing mood, soft warm daylight
+- Palette: sage greens, cream, warm wood browns, peach accents
+- Assets: meadow background, Tori chibi pixel character, wooden dialogue frame feel via CSS

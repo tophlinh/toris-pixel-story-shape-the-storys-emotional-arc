@@ -1,0 +1,16 @@
+{
+  "name": "Tori’s Pixel Story",
+  "revisionLabel": "Shape the Story’s Emotional Arc",
+  "description": "Create a minimal, cozy pixel-art story presentation introducing Tori and explaining how AI changed corporate work from 2024 to 2026. Contrast the shift from novelty to embedded workflow infrastructure, use her examples of writing product briefs, analyzing training data, and debugging pipelines, then emphasize that AI speeds execution while humans provide judgment about what to build and why. Continue with a section on human judgment and skills in working effectively with AI. Present it as a warm, clear short talk of about three minutes.",
+  "mode": "Universal",
+  "exportDate": "2026-10-28T07:07:40.719Z",
+  "rosebudBuiltInSplash": {
+    "present": true,
+    "version": 1
+  },
+  "assetCount": 13,
+  "assetTypes": [
+    "image",
+    "audio"
+  ]
+}

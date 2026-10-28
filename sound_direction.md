@@ -1,0 +1,3 @@
+- Gentle lo-fi acoustic/chiptune loop, calm and cozy
+- SFX: soft page-turn blip on slide advance
+- Music starts on first click; M toggles mute

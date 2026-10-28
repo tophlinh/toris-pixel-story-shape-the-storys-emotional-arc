@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tori's Story</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./rosebud-game-defaults.css" />
+    <script src="./rosebud-game-defaults.js" defer></script>
+    <script type="importmap">
+      {
+        "imports": {}
+      }
+    </script>
+    <style>
+      html, body, #game-container { width: 100%; height: 100%; margin: 0; padding: 0; background: #2b2a24; overflow: hidden; }
+      body { touch-action: none; font-family: 'VT323', monospace; }
+      #stage { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center; image-rendering: pixelated;
+        background: url(assets/image.png) center/cover; cursor: pointer; }
+      #ghosts { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; }
+      .ghost-float { position: absolute; width: 190px; opacity: 0.78; image-rendering: pixelated; filter: drop-shadow(0 0 12px #a4f4ef88);
+        animation: ghost-drift 7s ease-in-out infinite; pointer-events: auto; cursor: zoom-in; }
+      .ghost-float--left { left: 24px; top: 245px; }
+      .ghost-float--middle { left: 485px; top: 635px; width: 155px; animation-delay: -2.5s; animation-duration: 8s; }
+      .ghost-float--right { right: 4px; top: 555px; width: 170px; animation-delay: -4s; animation-duration: 9s; }
+      @keyframes ghost-drift { 0%, 100% { transform: translate(0, 0) rotate(-2deg); } 50% { transform: translate(10px, -18px) rotate(2deg); } }
+      #chapter, #progress, #tori, #panel, #dialog { z-index: 2; }
+      #chapter { position: absolute; top: 40px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; justify-content: center;
+        box-sizing: border-box; width: max-content; height: 82px; padding: 0 32px; white-space: nowrap; text-align: center;
+        font-family: 'Press Start 2P'; font-size: 26px; color: #fff8e7; background: #7a9a5c; border: 6px solid #4a5e36; box-shadow: 0 6px 0 #33402a; }
+      #chapter-nav { position: absolute; top: 142px; left: 32px; z-index: 4; width: 490px; box-sizing: border-box; padding: 12px 16px;
+        background: #fff8e7; border: 7px solid #8b5e3c; box-shadow: 0 8px 0 #5c3d26, inset 0 0 0 4px #f0d9b0; }
+      #chapter-nav-title { margin: 0 0 4px; color: #4a5e36; font: 17px 'Press Start 2P'; line-height: 1.5; }
+      #chapter-nav-hint { margin: 0 0 8px; color: #75533a; font: 24px 'VT323', monospace; }
+      .chapter-nav__buttons { display: grid; grid-template-columns: 1fr; gap: 5px; }
+      .chapter-nav__button { display: grid; grid-template-columns: 42px 1fr auto; align-items: center; gap: 10px; width: 100%; min-height: 40px; padding: 4px 10px;
+        border: 3px solid #c7a77e; background: #f7e6c4; color: #3d2e22; box-shadow: 0 3px 0 #c7a77e;
+        font: 25px 'VT323', monospace; text-align: left; cursor: pointer; transition: background-color 120ms ease, transform 120ms ease; }
+      .chapter-nav__button:hover:not(.is-active) { background: #fff0cf; transform: translateY(-2px); }
+      .chapter-nav__number { display: grid; place-items: center; width: 34px; height: 30px; box-sizing: border-box; background: #e7d1a8; color: #5c3d26; font: 18px 'Press Start 2P'; }
+      .chapter-nav__label { white-space: nowrap; }
+      .chapter-nav__state { color: #8b5e3c; font-size: 21px; white-space: nowrap; }
+      .chapter-nav__button.is-active { border-color: #4a5e36; background: #7a9a5c; color: #fff8e7; box-shadow: inset 0 0 0 2px #c5d7a7, 0 4px 0 #33402a; }
+      .chapter-nav__button.is-active .chapter-nav__number { background: #fff8e7; color: #4a5e36; }
+      .chapter-nav__button.is-active .chapter-nav__state { color: #fff8e7; }
+      .chapter-nav__button:focus-visible { outline: 5px solid #e89a7a; outline-offset: 3px; }
+      #tori { position: absolute; left: 160px; bottom: 300px; width: 300px; animation: bob 1.2s steps(2) infinite; image-rendering: pixelated; cursor: zoom-in; }
+      @keyframes bob { 50% { transform: translateY(-10px); } }
+      #panel { position: absolute; right: 120px; top: 150px; width: 1240px; min-height: 360px; background: #fff8e7ee; border: 8px solid #8b5e3c;
+        box-shadow: 0 8px 0 #5c3d26, inset 0 0 0 6px #f0d9b0; padding: 40px 50px; color: #3d2e22; font-size: 44px; line-height: 1.2; box-sizing: border-box; }
+      #panel.has-visual { min-height: 480px; }
+      #panel h2 { font-family: 'Press Start 2P'; font-size: 30px; margin: 0 0 24px; color: #6b8a4a; line-height: 1.4; }
+      .slide-body { display: block; }
+      .slide-body.has-visual { display: flex; align-items: center; gap: 30px; }
+      .slide-visual { display: block; flex: 0 0 380px; width: 380px; height: 300px; object-fit: contain; box-sizing: border-box;
+        padding: 8px; background: #fffdf8; border: 5px solid #e4d3b4; box-shadow: 0 5px 0 #c7a77e; cursor: zoom-in; }
+      #image-viewer { position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center;
+        box-sizing: border-box; padding: 60px; background: #171610eF; cursor: zoom-out; }
+      #image-viewer[hidden] { display: none; }
+      #image-viewer-image { display: block; max-width: calc(100vw - 120px); max-height: calc(100vh - 120px); object-fit: contain;
+        background: #fff8e7; box-shadow: 0 0 0 8px #fff8e7, 0 12px 0 8px #8b5e3c; cursor: default; }
+      #image-viewer-close { position: absolute; top: 28px; right: 32px; border: 4px solid #fff8e7; padding: 8px 18px; background: #8b5e3c;
+        color: #fff8e7; font: 36px 'VT323', monospace; cursor: pointer; box-shadow: 0 5px 0 #5c3d26; }
+      #image-viewer-hint { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); color: #fff8e7;
+        font: 28px 'VT323', monospace; text-shadow: 2px 2px 0 #3d2e22; white-space: nowrap; }
+      #panel .slide-body.has-visual ul { flex: 1; min-width: 0; font-size: 34px; line-height: 1.12; }
+      #panel ul { margin: 0; padding-left: 40px; } #panel li { margin: 10px 0; list-style: '🌱 '; }
+      #panel .slide-body.has-visual li { margin: 8px 0; }
+      #dialog { position: absolute; left: 120px; right: 120px; bottom: 50px; height: 220px; background: #f7e6c4; border: 8px solid #8b5e3c;
+        box-shadow: 0 8px 0 #5c3d26; padding: 28px 40px; box-sizing: border-box; font-size: 46px; color: #3d2e22; }
+      #name { position: absolute; top: -40px; left: 30px; background: #e89a7a; color: #fff; font-family: 'Press Start 2P'; font-size: 22px; padding: 10px 18px; border: 5px solid #8b5e3c; }
+      #hint { position: absolute; right: 30px; bottom: 16px; font-size: 32px; color: #8b5e3c; animation: bob 0.8s steps(2) infinite; }
+      #progress { position: absolute; top: 60px; right: 60px; font-family: 'Press Start 2P'; font-size: 18px; color: #fff8e7; text-shadow: 3px 3px 0 #33402a; }
+      @media (prefers-reduced-motion: reduce) { .ghost-float { animation: none; } }
+    </style>
+  
+<style>
+    #rosebud-exported-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483647;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #000;
+        opacity: 1;
+        transition: opacity 500ms ease-in-out;
+    }
+
+    #rosebud-exported-splash.is-hiding {
+        opacity: 0;
+    }
+
+    #rosebud-exported-splash .rosebud-exported-splash__content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        text-align: center;
+        color: #fff;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    #rosebud-exported-splash .rosebud-exported-splash__logo {
+        width: 100px;
+        height: 100px;
+        animation: rosebud-exported-splash-breathe 2.4s ease-in-out infinite;
+    }
+
+    #rosebud-exported-splash .rosebud-exported-splash__text {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        font-size: 16px;
+        line-height: 1.25;
+        letter-spacing: 0.06em;
+    }
+
+    #rosebud-exported-splash .rosebud-exported-splash__text strong {
+        font-weight: 700;
+    }
+
+    #rosebud-exported-splash .rosebud-exported-splash__text span:last-child {
+        opacity: 0.88;
+    }
+
+    @keyframes rosebud-exported-splash-breathe {
+        0%,
+        100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+</style></head>
+  <body>
+<div id="rosebud-exported-splash" aria-live="polite">
+    <div class="rosebud-exported-splash__content">
+        <img
+            class="rosebud-exported-splash__logo"
+            src="__rosebud/rosebud-icon.png"
+            alt="Rosebud Logo"
+            width="100"
+            height="100"
+        />
+        <div class="rosebud-exported-splash__text" aria-label="Rosebud.AI Make Games">
+            <strong>Rosebud.AI</strong>
+            <span>Make Games</span>
+        </div>
+    </div>
+</div>
+    <div id="game-container">
+      <div id="stage">
+        <div id="ghosts" aria-hidden="true">
+          <img class="ghost-float ghost-float--left" src="assets/image-4.png" alt="" draggable="false">
+          <img class="ghost-float ghost-float--middle" src="assets/image-4.png" alt="" draggable="false">
+          <img class="ghost-float ghost-float--right" src="assets/image-4.png" alt="" draggable="false">
+        </div>
+        <div id="chapter"></div>
+        <div id="progress"></div>
+        <nav id="chapter-nav" aria-label="Chapter navigator">
+          <div id="chapter-nav-title">CHOOSE A CHAPTER</div>
+          <p id="chapter-nav-hint">Click a section to jump there</p>
+          <div class="chapter-nav__buttons">
+            <button class="chapter-nav__button" type="button" data-chapter="Chapter 1 · About Me"><span class="chapter-nav__number">01</span><span class="chapter-nav__label">About Me</span><span class="chapter-nav__state">GO →</span></button>
+            <button class="chapter-nav__button" type="button" data-chapter="Chapter 2 · AI in Corporate"><span class="chapter-nav__number">02</span><span class="chapter-nav__label">AI in Corporate</span><span class="chapter-nav__state">GO →</span></button>
+            <button class="chapter-nav__button" type="button" data-chapter="Chapter 3 · Personalization &amp; Taste"><span class="chapter-nav__number">03</span><span class="chapter-nav__label">Personalization &amp; Taste</span><span class="chapter-nav__state">GO →</span></button>
+            <button class="chapter-nav__button" type="button" data-chapter="Chapter 4 · Musings"><span class="chapter-nav__number">04</span><span class="chapter-nav__label">Musings</span><span class="chapter-nav__state">GO →</span></button>
+            <button class="chapter-nav__button" type="button" data-chapter="The End · Thanks for Being Here"><span class="chapter-nav__number">05</span><span class="chapter-nav__label">Ending</span><span class="chapter-nav__state">GO →</span></button>
+          </div>
+        </nav>
+        <img id="tori" src="assets/image-3.png" alt="Pixel black cat sitting in a glowing pumpkin" tabindex="0" role="button" aria-label="Expand Tori image">
+        <div id="panel"></div>
+        <div id="dialog"><div id="name">TORI</div><div id="text"></div><div id="hint">▼ click / → · M mute</div></div>
+      </div>
+      <div id="image-viewer" role="dialog" aria-modal="true" aria-label="Expanded presentation image" hidden>
+        <button id="image-viewer-close" type="button" aria-label="Close expanded image">Close ×</button>
+        <img id="image-viewer-image" alt="">
+        <div id="image-viewer-hint">Click outside or press Esc to close</div>
+      </div>
+    </div>
+    <script type="module" src="main.js"></script>
+    <script src="https://storage.googleapis.com/rosebud_staticfiles/ChatManager.js"></script>
+    <script src="https://storage.googleapis.com/rosebud_staticfiles/ProgressLogger.js"></script>
+    <script src="https://storage.googleapis.com/rosebud_staticfiles/OGP.js"></script>
+  
+<script>
+    (() => {
+        const splashRoot = document.getElementById('rosebud-exported-splash');
+        if (!splashRoot) return;
+
+        let isReady = false;
+        let isMinimumVisibleTimeElapsed = false;
+        let isHidden = false;
+
+        const maybeHideSplash = () => {
+            if (isHidden || !isReady || !isMinimumVisibleTimeElapsed) return;
+
+            isHidden = true;
+            splashRoot.classList.add('is-hiding');
+            window.setTimeout(() => splashRoot.remove(), 500);
+        };
+
+        const markReady = () => {
+            isReady = true;
+            maybeHideSplash();
+        };
+
+        window.setTimeout(() => {
+            isMinimumVisibleTimeElapsed = true;
+            maybeHideSplash();
+        }, 1000);
+
+        if (document.readyState === 'complete') {
+            markReady();
+        } else {
+            window.addEventListener('load', markReady, { once: true });
+        }
+
+        
+    })();
+</script></body>
+</html>
